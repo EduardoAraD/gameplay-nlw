@@ -4,7 +4,8 @@ import {
   View,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Alert,
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
@@ -12,6 +13,7 @@ import uuid from 'react-native-uuid'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import * as Notifications from 'expo-notifications';
 
 import { RootStackParamList } from '../../routes/app.routes';
 
@@ -63,23 +65,50 @@ export function AppointmentCreate() {
   }
 
   async function handleSave() {
-    const newAppointment = {
-      id: uuid.v4(),
-      guild,
-      category,
-      date: `${day}/${month} às ${hour}:${minute}h`,
-      description
+    const now = new Date(Date.now())
+    const dateString = `${now.getFullYear()}/${month}/${day} ${hour}:${minute}:00`;
+
+    const dateCreate = new Date(dateString);
+
+    if (guild && category && !!dateCreate.getTime() && description) {
+      const seconds = Math.abs(
+        Math.ceil((now.getTime() - dateCreate.getTime()) / 1000)
+      )
+
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Vamos pra ação ${guild.name}`,
+          body: description,
+          sound: true,
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+        },
+        trigger: {
+          seconds,
+          repeats: false
+        }
+      })
+
+      const newAppointment = {
+        id: uuid.v4(),
+        guild,
+        category,
+        date: `${day}/${month} às ${hour}:${minute}h`,
+        description,
+        notificationId,
+      }
+
+      const storage = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
+      const appointments = storage ? JSON.parse(storage) : [];
+
+      await AsyncStorage.setItem(
+        COLLECTION_APPOINTMENTS,
+        JSON.stringify([...appointments, newAppointment])
+      );
+
+      navigation.navigate('Home');
+    } else {
+      Alert.alert('Existem campos para cadastrar.');
     }
-
-    const storage = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
-    const appointments = storage ? JSON.parse(storage) : [];
-
-    await AsyncStorage.setItem(
-      COLLECTION_APPOINTMENTS,
-      JSON.stringify([...appointments, newAppointment])
-    );
-
-    navigation.navigate('Home');
   }
 
   return (

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import React from 'react';
+import { ScrollView } from 'react-native';
 
 import { Category } from '../Category';
 import { styles } from './styles';

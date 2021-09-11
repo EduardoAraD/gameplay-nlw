@@ -3,6 +3,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FlatList, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
+import * as Notifications from 'expo-notifications';
 
 import { RootStackParamList } from '../../routes/app.routes';
 
@@ -58,6 +59,8 @@ export function Home() {
   async function handleRemoveAppointment(index: number) {
     const response = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
     const storage: AppointmentProps[] = response ? JSON.parse(response) : [];
+
+    await Notifications.cancelScheduledNotificationAsync(storage[index].notificationId);
 
     delete storage[index];
     const itens = storage.filter(item => !!item);
