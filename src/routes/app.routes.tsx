@@ -5,11 +5,12 @@ import { Home } from '../screens/Home';
 import { theme } from '../global/styles/theme';
 import { AppointmentDetails } from '../screens/AppointmentDetails';
 import { AppointmentCreate } from '../screens/AppointmentCreate';
+import { AppointmentProps } from '../components/Appointment';
 
 export type RootStackParamList = {
   SignIn: undefined;
   Home: undefined;
-  AppointmentDetails: undefined;
+  AppointmentDetails: { guildSelected: AppointmentProps };
   AppointmentCreate: undefined;
 };
 
