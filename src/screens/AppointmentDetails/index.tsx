@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { BorderlessButton } from 'react-native-gesture-handler';
 import { Fontisto } from '@expo/vector-icons';
-import { Alert, FlatList, ImageBackground, Text, View, Share, Platform } from 'react-native';
+import {
+  FlatList,
+  ImageBackground,
+  Text,
+  View,
+  Share,
+  Platform
+} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 
@@ -12,12 +19,13 @@ import { Member, MemberProps } from '../../components/Member';
 import { ListDivider } from '../../components/ListDivider';
 import { ButtonIcon } from '../../components/ButtonIcon';
 import { AppointmentProps } from '../../components/Appointment';
+import { Loading } from '../../components/Loading';
+import { MessageSnackBar } from '../../components/MessageSnackBar';
 
 import { theme } from '../../global/styles/theme';
 import banner from '../../assets/banner.png';
 import { styles } from './styles';
 import { api } from '../../services/api';
-import { Loading } from '../../components/Loading';
 
 type Params = {
   guildSelected: AppointmentProps;
@@ -37,13 +45,14 @@ export function AppointmentDetails() {
 
   const [widget, setWidget] = useState<GuildWidget>({} as GuildWidget);
   const [loading, setLoading] = useState(true);
+  const [isVisibleSnackbar, setisVisibleSnackbar] = useState(false);
 
   async function fecthGuildWidget() {
     try {
       const response = await api.get(`/guilds/${guildSelected.guild.id}/widget.json`);
       setWidget(response.data);
     } catch (error) {
-      Alert.alert('Verifique as configurações do servidor. Será que o Widget está habilidado?')
+      setisVisibleSnackbar(true);
     } finally {
       setLoading(false);
     }
@@ -107,6 +116,12 @@ export function AppointmentDetails() {
           />
         </View>
       )}
+      <MessageSnackBar
+        title='Verifique as configurações do servidor. Será que o Widget está habilidado?'
+        success={false}
+        visible={isVisibleSnackbar}
+        onClose={() => setisVisibleSnackbar(false)}
+      />
     </Background>
   )
 }

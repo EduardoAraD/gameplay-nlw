@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, Alert, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, ActivityIndicator } from 'react-native';
 
 import { useAuth } from '../../hooks/auth';
 
@@ -8,15 +8,17 @@ import IllustrationImg from '../../assets/illustration.png';
 import { styles } from './styles';
 import { Background } from '../../components/Background';
 import { theme } from '../../global/styles/theme';
+import { MessageSnackBar } from '../../components/MessageSnackBar';
 
 export function SignIn() {
   const { signIn, loading } = useAuth();
+  const [isVisibleSnackbar, setisVisibleSnackbar] = useState(false);
 
   async function handleSignIn() {
     try {
       await signIn();
     } catch (error) {
-      Alert.alert(String(error));
+      setisVisibleSnackbar(true);
     }
   }
 
@@ -49,6 +51,12 @@ export function SignIn() {
           )}
         </View>
       </View>
+      <MessageSnackBar
+        title='Não foi possível autenticar'
+        success={false}
+        visible={isVisibleSnackbar}
+        onClose={() => setisVisibleSnackbar(false)}
+      />
     </Background>
   )
 }

@@ -5,7 +5,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
@@ -28,6 +27,7 @@ import { TextArea } from '../../components/TextArea';
 import { Button } from '../../components/Button';
 import { ModalView } from '../../components/ModalView';
 import { GuildProps } from '../../components/Guild';
+import { MessageSnackBar } from '../../components/MessageSnackBar';
 import { Guilds } from '../Guilds';
 import { styles } from './styles';
 import { theme } from '../../global/styles/theme';
@@ -37,15 +37,19 @@ type screenProp = StackNavigationProp<RootStackParamList, 'Home'>
 export function AppointmentCreate() {
   const navigation = useNavigation<screenProp>();
 
-  const [category, setCategory] = useState('');
   const [openGuildsModal, setOpenGuildsModal] = useState(false);
 
   const [guild, setGuild] = useState<GuildProps>({} as GuildProps);
+  const [category, setCategory] = useState('');
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [hour, setHour] = useState('');
   const [minute, setMinute] = useState('');
   const [description, setDescription] = useState('');
+
+  const [textMessage, setTextMessage] = useState('');
+  const [successSnackbar, setSuccessSnackBar] = useState(false);
+  const [isVisibleSnackbar, setisVisibleSnackbar] = useState(false);
 
   function handleOpenGuilds() {
     setOpenGuildsModal(true);
@@ -64,51 +68,87 @@ export function AppointmentCreate() {
     setCategory(categoryId);
   }
 
+  function handleSnackbar(text: string, success: boolean) {
+    setTextMessage(text);
+    setSuccessSnackBar(success);
+    setisVisibleSnackbar(true);
+  }
+
   async function handleSave() {
+    console.log(category);
+    if (category !== '') {
+      handleSnackbar('É necessário cadastrar a categoria.', false)
+      return;
+    }
+    if (guild) {
+      handleSnackbar('É necessário cadastrar o Servidor', false)
+      return;
+    }
+    if (day && month) {
+      handleSnackbar('É necessário cadastrar o dia e o mês.', false)
+      return;
+    }
+    if (hour && minute) {
+      handleSnackbar('É necessário cadastrar a hora e o minuto.', false)
+      return;
+    }
+    if (description) {
+      handleSnackbar('É necessário cadastrar a descrição.', false)
+      return;
+    }
+
     const now = new Date(Date.now())
     const dateString = `${now.getFullYear()}/${month}/${day} ${hour}:${minute}:00`;
 
     const dateCreate = new Date(dateString);
+    const timeNow = now.getTime();
+    const timeCreate = dateCreate.getTime();
 
-    if (guild && category && !!dateCreate.getTime() && description) {
-      const seconds = Math.abs(
-        Math.ceil((now.getTime() - dateCreate.getTime()) / 1000)
-      )
-
-      const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `Vamos pra ação ${guild.name}`,
-          body: description,
-          sound: true,
-          priority: Notifications.AndroidNotificationPriority.HIGH,
-        },
-        trigger: {
-          seconds,
-          repeats: false
-        }
-      })
-
-      const newAppointment = {
-        id: uuid.v4(),
-        guild,
-        category,
-        date: `${day}/${month} às ${hour}:${minute}h`,
-        description,
-        notificationId,
-      }
-
-      const storage = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
-      const appointments = storage ? JSON.parse(storage) : [];
-
-      await AsyncStorage.setItem(
-        COLLECTION_APPOINTMENTS,
-        JSON.stringify([...appointments, newAppointment])
-      );
-
-      navigation.navigate('Home');
-    } else {
-      Alert.alert('Existem campos para cadastrar.');
+    if (!!timeCreate) {
+      handleSnackbar('Os valores da data e horario estão inválidos.', false)
+      return;
     }
+    if (timeCreate - timeNow) {
+      handleSnackbar('A data cadastrada é menor que a data atual.', false)
+      return;
+    }
+
+    const seconds = Math.abs(
+      Math.ceil((now.getTime() - dateCreate.getTime()) / 1000)
+    )
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `Vamos pra ação ${guild.name}`,
+        body: description,
+        sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger: {
+        seconds,
+        repeats: false
+      }
+    })
+
+    const newAppointment = {
+      id: uuid.v4(),
+      guild,
+      category,
+      date: `${day}/${month} às ${hour}:${minute}h`,
+      description,
+      notificationId,
+    }
+
+    const storage = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
+    const appointments = storage ? JSON.parse(storage) : [];
+
+    handleSnackbar('Cadastrado com sucesso.', true);
+
+    await AsyncStorage.setItem(
+      COLLECTION_APPOINTMENTS,
+      JSON.stringify([...appointments, newAppointment])
+    );
+    navigation.navigate('Home');
   }
 
   return (
@@ -206,6 +246,12 @@ export function AppointmentCreate() {
           <Guilds handleGuildSelect={handleGuildSelect} />
         </ModalView>
       }
+      <MessageSnackBar
+        title={textMessage}
+        success={successSnackbar}
+        visible={isVisibleSnackbar}
+        onClose={() => setisVisibleSnackbar(false)}
+      />
     </KeyboardAvoidingView>
   )
 }
