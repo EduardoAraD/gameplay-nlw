@@ -1,26 +1,22 @@
 import React from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+
 import { useAuth } from '../../hooks/auth';
 import { Avatar } from '../Avatar';
 import { styles } from './styles';
 
-export function Profile() {
-  const { user, signOut } = useAuth();
-  // gerar frases aleatorias
+type Props = {
+  onPressAvatar(): void;
+}
 
-  function handleSignOut() {
-    Alert.alert('Logout', 'Deseja sair do GamePlay',
-      [
-        { text: 'Não', style: 'cancel' },
-        { text: 'Sim', onPress: () => signOut() }
-      ]
-    )
-  }
+export function Profile({ onPressAvatar }: Props) {
+  const { user } = useAuth();
+  // gerar frases aleatorias
 
   return (
     <View style={styles.container}>
-      <RectButton onPress={handleSignOut}>
+      <RectButton onPress={onPressAvatar}>
         <Avatar urlImage={user.avatar} />
       </RectButton>
       <View>

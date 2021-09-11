@@ -6,6 +6,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  image: {
+    width: 62,
+    height: 66,
+    borderRadius: 8,
+    backgroundColor: theme.colors.discord,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
   user: {
     flexDirection: 'row'
   },

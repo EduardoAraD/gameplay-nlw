@@ -6,6 +6,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignSelf: 'center',
+    backgroundColor: theme.colors.secondary90,
   },
   content: {
     flex: 1,
@@ -59,5 +60,15 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 20,
+  },
+  buttonRemove: {
+    width: 100,
+    height: 69,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    right: 20,
+    paddingLeft: 15,
   }
 })

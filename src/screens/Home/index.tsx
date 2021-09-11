@@ -18,6 +18,8 @@ import { Profile } from '../../components/Profile';
 import { Loading } from '../../components/Loading';
 
 import { styles } from './styles';
+import { ModalSignOut } from '../../components/ModalSignOut';
+import { GuildProps } from '../../components/Guild';
 
 type screenProp = StackNavigationProp<RootStackParamList, 'AppointmentCreate'>
 
@@ -25,6 +27,7 @@ export function Home() {
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<screenProp>();
+  const [isModalSignOut, setIsModalSignOut] = useState(false);
 
   const [appointments, setAppointments] = useState<AppointmentProps[]>([])
 
@@ -52,6 +55,21 @@ export function Home() {
     setLoading(false);
   }
 
+  async function handleRemoveAppointment(index: number) {
+    const response = await AsyncStorage.getItem(COLLECTION_APPOINTMENTS);
+    const storage: AppointmentProps[] = response ? JSON.parse(response) : [];
+
+    delete storage[index];
+    const itens = storage.filter(item => !!item);
+
+    setAppointments(itens);
+    await AsyncStorage.setItem(COLLECTION_APPOINTMENTS, JSON.stringify(itens));
+  }
+
+  function handlePressSignOut() {
+    setIsModalSignOut(true);
+  }
+
   useFocusEffect(useCallback(() => {
     loadAppointments();
   }, [category]))
@@ -59,7 +77,7 @@ export function Home() {
   return (
     <Background >
       <View style={styles.header}>
-        <Profile />
+        <Profile onPressAvatar={handlePressSignOut} />
         <ButtonAdd onPress={handleAppointmentCreate} />
       </View>
 
@@ -73,9 +91,10 @@ export function Home() {
           <FlatList
             data={appointments}
             keyExtractor={item => item.id}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <Appointment
                 data={item}
+                onPressRemove={() => handleRemoveAppointment(index)}
                 onPress={() => handleAppointmentDetails(item)}
               />
             )}
@@ -86,6 +105,10 @@ export function Home() {
           />
         </>
       )}
+      <ModalSignOut
+        isVisible={isModalSignOut}
+        closeModal={() => setIsModalSignOut(false)}
+      />
     </Background>
   )
 }

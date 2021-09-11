@@ -56,15 +56,17 @@ function AuthProvider({ children }: AuthProviderProps) {
         api.defaults.headers.authorization = `Bearer ${params.access_token}`;
 
         const userInfo = await api.get('/users/@me');
-        console.log(userInfo.data);
 
         // colocar uma imagem aleatoria para avatar null
         const firstName = userInfo.data.username.split(' ')[0];
-        userInfo.data.avatar = `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`;
+        const avatar = userInfo.data.avatar
+          ? `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`
+          : userInfo.data.avatar
 
         const userData = {
           ...userInfo.data,
           firstName,
+          avatar,
           token: params.access_token,
         }
 

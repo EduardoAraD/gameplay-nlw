@@ -3,6 +3,7 @@ import { Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { theme } from '../../global/styles/theme';
+import DiscordSVG from '../../assets/discord.svg';
 import { styles } from './styles';
 
 type Props = {
@@ -17,10 +18,17 @@ export function Avatar({ urlImage }: Props) {
       style={styles.container}
       colors={[secondary50, secondary70]}
     >
-      <Image
-        source={{ uri: urlImage }}
-        style={styles.image}
-      />
+      {urlImage ? (
+        <Image
+          source={{ uri: urlImage }}
+          style={styles.image}
+        />
+      ) : (
+        <DiscordSVG
+          width={32}
+          height={32}
+        />
+      )}
     </LinearGradient>
   );
 }
