@@ -15,7 +15,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     paddingHorizontal: 24,
-    marginBottom: 30
   },
   title: {
     fontSize: 28,
@@ -26,6 +25,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: theme.fonts.text400,
     color: theme.colors.heading,
+    lineHeight: 21,
   },
   members: {
     marginLeft: 24,
